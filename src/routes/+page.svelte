@@ -16,6 +16,9 @@
     let lastElem
     let altElem
 
+    let tableArr
+    let constantRepayment
+
     function newton_raphson_then_dichotomy(x, getY, derivative) {
         let higherY = +Infinity, lowerY = -Infinity
         let higherX, lowerX
@@ -120,6 +123,20 @@
                 endingBalanceValue=((openingBalanceValue*interestRateValue)/((interestRateValue + 1)**repaymentsCountValue - 1)+interestRateValue*openingBalanceValue)*repaymentsCountValue
                 break
         }
+
+        setTimeout(() => {
+            const arr = []
+            let C = openingBalanceValue
+            let sure = endingBalanceValue/repaymentsCountValue
+            for (let i = 0; i < repaymentsCountValue; i++) {
+                const interest = C*interestRateValue
+                const principal = sure - interest
+                C-=principal
+                arr.push({principal,interest,C})
+            }
+            constantRepayment = sure
+            tableArr = arr
+        }, 50);
     }
 
     function handleKeydown(event) {
@@ -131,6 +148,11 @@
         }, 1);
     }
 
+    function round2DecimalPlaces(num) {
+        const rounded = Math.round((num + Number.EPSILON) * 100) / 100
+        return rounded.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    }
+
 </script>
 
 <label for="openingBalance">openingBalance</label><input type="number" name="openingBalance" id="openingBalance" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={openingBalance} bind:value={openingBalanceValue}>
@@ -138,5 +160,54 @@
 <label for="repaymentsCount">repaymentsCount</label><input type="number" name="repaymentsCount" id="repaymentsCount" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={repaymentsCount} bind:value={repaymentsCountValue}>
 <label for="endingBalance">endingBalance</label><input type="number" name="endingBalance" id="endingBalance" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={endingBalance} bind:value={endingBalanceValue}>
 
+{#if tableArr}
+<div style="display: flex; gap: 15em;">
+
+<div>
+    <p>constantRepayment: {round2DecimalPlaces(constantRepayment)}</p>
+    <table>
+    <thead>
+    <tr>
+    <th>#</th>
+    <th>principal</th>
+    <th>interest</th>
+    <th>balanceAfter</th>
+    </tr>
+    </thead>
+    <tbody>
+    {#each tableArr as {principal,interest,C}, idx}
+    <tr><td>{idx+1}</td><td>{round2DecimalPlaces(principal)}</td><td>{round2DecimalPlaces(interest)}</td><td>{round2DecimalPlaces(C)}</td></tr>
+    {/each}
+    </tbody>
+    </table>
+</div>
+<div>
+    <p>constantRepayment: {constantRepayment}</p>
+    <table>
+    <thead>
+    <tr>
+    <th>#</th>
+    <th>principal</th>
+    <th>interest</th>
+    <th>balanceAfter</th>
+    </tr>
+    </thead>
+    <tbody>
+    {#each tableArr as {principal,interest,C}, idx}
+    <tr><td>precise {idx+1}</td><td>{principal}</td><td>{interest}</td><td>{C}</td></tr>
+    {/each}
+    </tbody>
+    </table>
+</div>
+
+</div>
+{/if}
+
 <style>
+table {
+    border-collapse: collapse;
+}
+th, td {
+    border: 0.05em solid black
+}
 </style>
