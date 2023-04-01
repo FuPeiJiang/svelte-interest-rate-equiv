@@ -6,12 +6,12 @@
     let openingBalance
     let interestRate
     let repaymentsCount
-    let endingBalance
+    let totalPayment
 
     let openingBalanceValue
     let interestRateValue
     let repaymentsCountValue
-    let endingBalanceValue
+    let totalPaymentValue
 
     let lastElem
     let altElem
@@ -74,7 +74,7 @@
     function okLetsTry(event) {
 
         const empty = []
-        for (const element of [openingBalance,interestRate,repaymentsCount,endingBalance]) {
+        for (const element of [openingBalance,interestRate,repaymentsCount,totalPayment]) {
             if (element.value === "") {
                 empty.push(element)
             }
@@ -102,11 +102,11 @@
         switch (curElem) {
             case openingBalance:
                 //not useful, for fun only
-                openingBalanceValue = (endingBalanceValue*(interestRateValue + 1)**(-repaymentsCountValue)*((interestRateValue + 1)**repaymentsCountValue - 1))/(interestRateValue*repaymentsCountValue)
+                openingBalanceValue = (totalPaymentValue*(interestRateValue + 1)**(-repaymentsCountValue)*((interestRateValue + 1)**repaymentsCountValue - 1))/(interestRateValue*repaymentsCountValue)
                 break
             case interestRate:
                 interestRateValue = newton_raphson_then_dichotomy(0.1, function getY(interestRateValue) {
-                    return openingBalanceValue*interestRateValue*repaymentsCountValue*(1/((interestRateValue + 1)**repaymentsCountValue - 1) + 1) - endingBalanceValue
+                    return openingBalanceValue*interestRateValue*repaymentsCountValue*(1/((interestRateValue + 1)**repaymentsCountValue - 1) + 1) - totalPaymentValue
                 }, function derivative(x) {
                     return openingBalanceValue*repaymentsCountValue*(-(repaymentsCountValue*x*(x + 1)**(repaymentsCountValue - 1))/((x + 1)**repaymentsCountValue - 1)**2 + 1/((x + 1)**repaymentsCountValue - 1) + 1)
                 })
@@ -114,20 +114,20 @@
             case repaymentsCount:
                 //not useful, for fun only
                 repaymentsCountValue = newton_raphson_then_dichotomy(25, function getY(repaymentsCountValue) {
-                    return openingBalanceValue*interestRateValue*repaymentsCountValue*(1/((interestRateValue + 1)**repaymentsCountValue - 1) + 1) - endingBalanceValue
+                    return openingBalanceValue*interestRateValue*repaymentsCountValue*(1/((interestRateValue + 1)**repaymentsCountValue - 1) + 1) - totalPaymentValue
                 }, function derivative(x) {
                     return (openingBalanceValue*interestRateValue*(interestRateValue + 1)**x*((interestRateValue + 1)**x - x*Math.log(interestRateValue + 1) - 1))/((interestRateValue + 1)**x - 1)**2
                 })
                 break
-            case endingBalance:
-                endingBalanceValue=((openingBalanceValue*interestRateValue)/((interestRateValue + 1)**repaymentsCountValue - 1)+interestRateValue*openingBalanceValue)*repaymentsCountValue
+            case totalPayment:
+                totalPaymentValue=((openingBalanceValue*interestRateValue)/((interestRateValue + 1)**repaymentsCountValue - 1)+interestRateValue*openingBalanceValue)*repaymentsCountValue
                 break
         }
 
         setTimeout(() => {
             const arr = []
             let C = openingBalanceValue
-            let sure = endingBalanceValue/repaymentsCountValue
+            let sure = totalPaymentValue/repaymentsCountValue
             for (let i = 0; i < repaymentsCountValue; i++) {
                 const interest = C*interestRateValue
                 const principal = sure - interest
@@ -158,7 +158,7 @@
 <label for="openingBalance">openingBalance</label><input type="number" name="openingBalance" id="openingBalance" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={openingBalance} bind:value={openingBalanceValue}>
 <label for="interestRate">interestRate</label><input type="number" name="interestRate" id="interestRate" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={interestRate} bind:value={interestRateValue}>
 <label for="repaymentsCount">repaymentsCount</label><input type="number" name="repaymentsCount" id="repaymentsCount" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={repaymentsCount} bind:value={repaymentsCountValue}>
-<label for="endingBalance">endingBalance</label><input type="number" name="endingBalance" id="endingBalance" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={endingBalance} bind:value={endingBalanceValue}>
+<label for="totalPayment">totalPayment</label><input type="number" name="totalPayment" id="totalPayment" on:keydown={handleKeydown} on:change={okLetsTry} on:paste={event=>setTimeout(okLetsTry(event),1)} bind:this={totalPayment} bind:value={totalPaymentValue}>
 
 {#if tableArr}
 <div style="display: flex; gap: 15em;">
